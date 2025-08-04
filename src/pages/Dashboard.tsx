@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useWallet } from "@/contexts/WalletContext";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { JobCard } from "@/components/JobCard";
@@ -105,25 +108,40 @@ const feedPosts = [
 ];
 
 export const Dashboard = () => {
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState("");
+  const { user, loading, signOut } = useAuth();
+  const { isConnected, walletAddress, connectMetaMask, disconnect } = useWallet();
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   const handleConnectWallet = () => {
-    // Mock wallet connection
-    setIsWalletConnected(true);
-    setWalletAddress("0x1234567890abcdef1234567890abcdef12345678");
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    connectMetaMask();
   };
 
   const handleDisconnect = () => {
-    setIsWalletConnected(false);
-    setWalletAddress("");
+    disconnect();
+    signOut();
+    navigate("/login");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar
-        isConnected={isWalletConnected}
+        isConnected={isConnected && !!walletAddress}
         walletAddress={walletAddress}
         onConnectWallet={handleConnectWallet}
         onDisconnect={handleDisconnect}
