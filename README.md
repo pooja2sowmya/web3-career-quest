@@ -1,51 +1,68 @@
-# Welcome to project
+# Web3 Career Quest 🌐💼
 
-## Project info
+A **minimal full-stack Job & Networking Portal** inspired by LinkedIn, Upwork, and AngelList. Built with modern web technologies, this platform integrates **AI-powered features** for job matching and skill extraction, and **Web3 wallet support** for a decentralized identity experience.
 
+### 🔗 Live Demo
+Access the deployed application here:  
+👉 [https://web3-career-quest.vercel.app/](https://web3-career-quest.vercel.app/)
 
+---
 
-**Use your preferred IDE**
+## 🚀 Overview
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Web3 Career Quest connects professionals through a decentralized platform that allows:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- ✅ Profile creation with manual or AI-based skill extraction
+- ✅ Job posting and job discovery
+- ✅ A public career-oriented feed (advice, updates, etc.)
+- ✅ MetaMask/Phantom wallet authentication
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🧩 Modules
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 📌 Module 1: Authentication & Profile Management
 
-# Step 3: Install the necessary dependencies.
-npm i
+- 🔐 **User Registration & Login**
+  - Session management using **JWT**
+  - Web3 wallet login via **MetaMask** or **Phantom**
+  
+- 📝 **Profile Creation**
+  - Name, bio, LinkedIn URL
+  - Skills (entered manually or extracted via AI from bio/resume)
+  - Public wallet address shown on profile
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+### 📌 Module 2: Job Posting & Feed
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- ✅ **Job Posting (for authenticated users)**
+  - Add job title, description, required skills, and budget/salary
+- 📃 **Career Feed**
+  - View job listings and posts (career tips, announcements, etc.)
+- 🔍 **Filters**
+  - Filter by **skills**, **location**, and **tags**
+  
+- 📦 **Secure Backend Storage**
+  - All user and job data stored securely in the backend (e.g., Supabase/Firebase or custom backend)
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🤖 AI/ML Integration
 
-## What technologies are used for this project?
+AI features enhance user interaction with:
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- 🧠 **Skill Extraction**
+  - NLP-powered skill extraction from user bios or resumes using LLMs (example: GPT API or custom model)
+  
+### Example Code Snippet (Skill Extraction)
+```js
+// Example (pseudo-code)
+const extractSkills = async (bio) => {
+  const response = await fetch('/api/ai/skills', {
+    method: 'POST',
+    body: JSON.stringify({ bio }),
+  });
+  const data = await response.json();
+  return data.skills; // returns ['React', 'Node.js', 'Blockchain']
+};
