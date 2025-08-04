@@ -6,11 +6,16 @@ import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { JobCard } from "@/components/JobCard";
 import { FeedCard } from "@/components/FeedCard";
+import { JobPostForm } from "@/components/JobPostForm";
+import { PostForm } from "@/components/PostForm";
+import { useJobs } from "@/hooks/useJobs";
+import { usePosts } from "@/hooks/usePosts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Search, Filter, Plus, TrendingUp, Briefcase, Users, Zap } from "lucide-react";
 
 // Mock data
@@ -110,7 +115,11 @@ const feedPosts = [
 export const Dashboard = () => {
   const { user, loading, signOut } = useAuth();
   const { isConnected, walletAddress, connectMetaMask, disconnect } = useWallet();
+  const { jobs, loading: jobsLoading, applyToJob, saveJob } = useJobs();
+  const { posts, loading: postsLoading, likePost, commentOnPost, sharePost } = usePosts();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showJobForm, setShowJobForm] = useState(false);
+  const [showPostForm, setShowPostForm] = useState(false);
   const navigate = useNavigate();
 
   const handleConnectWallet = () => {
@@ -170,10 +179,20 @@ export const Dashboard = () => {
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
-            <Button variant="web3" size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Post Job
-            </Button>
+            <Dialog open={showJobForm} onOpenChange={setShowJobForm}>
+              <DialogTrigger asChild>
+                <Button variant="web3" size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Post Job
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                <JobPostForm 
+                  onSuccess={() => setShowJobForm(false)}
+                  onCancel={() => setShowJobForm(false)}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
@@ -240,34 +259,65 @@ export const Dashboard = () => {
         <Tabs defaultValue="feed" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto bg-gradient-card">
             <TabsTrigger value="feed">Live Feed</TabsTrigger>
-            <TabsTrigger value="jobs">Featured Jobs</TabsTrigger>
+            <TabsTrigger value="jobs">Jobs</TabsTrigger>
           </TabsList>
 
           <TabsContent value="feed" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {feedPosts.map((post) => (
-                <FeedCard
-                  key={post.id}
-                  post={post}
-                  onLike={(id) => console.log("Liked post:", id)}
-                  onComment={(id) => console.log("Commented on post:", id)}
-                  onShare={(id) => console.log("Shared post:", id)}
-                />
-              ))}
+            <div className="flex justify-center mb-6">
+              <Dialog open={showPostForm} onOpenChange={setShowPostForm}>
+                <DialogTrigger asChild>
+                  <Button variant="web3" className="w-full max-w-md">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Share an Update
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl">
+                  <PostForm 
+                    onSuccess={() => setShowPostForm(false)}
+                    onCancel={() => setShowPostForm(false)}
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
+            
+            {postsLoading ? (
+              <div className="text-center py-12">
+                <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p className="text-muted-foreground mt-4">Loading posts...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {posts.map((post) => (
+                  <FeedCard
+                    key={post.id}
+                    post={post}
+                    onLike={likePost}
+                    onComment={commentOnPost}
+                    onShare={sharePost}
+                  />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {featuredJobs.map((job) => (
-                <JobCard
-                  key={job.id}
-                  job={job}
-                  onApply={(id) => console.log("Applied to job:", id)}
-                  onSave={(id) => console.log("Saved job:", id)}
-                />
-              ))}
-            </div>
+            {jobsLoading ? (
+              <div className="text-center py-12">
+                <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p className="text-muted-foreground mt-4">Loading jobs...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {jobs.map((job) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    onApply={applyToJob}
+                    onSave={saveJob}
+                  />
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>

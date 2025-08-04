@@ -4,34 +4,12 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Share2, MapPin, DollarSign, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface FeedPost {
-  id: string;
-  type: "job" | "announcement" | "update";
-  author: {
-    name: string;
-    avatar?: string;
-    company?: string;
-    title?: string;
-    walletAddress?: string;
-  };
-  content: string;
-  timestamp: string;
-  likes: number;
-  comments: number;
-  shares: number;
-  tags: string[];
-  jobData?: {
-    title: string;
-    salary: string;
-    location: string;
-  };
-}
+import { Post } from "@/lib/supabase";
 
 interface FeedCardProps {
-  post: FeedPost;
+  post: Post;
   onLike?: (postId: string) => void;
-  onComment?: (postId: string) => void;
+  onComment?: (postId: string, comment: string) => void;
   onShare?: (postId: string) => void;
   className?: string;
 }
@@ -62,12 +40,28 @@ export const FeedCard = ({ post, onLike, onComment, onShare, className }: FeedCa
         return { label: "Announcement", variant: "secondary" as const };
       case "update":
         return { label: "Update", variant: "outline" as const };
+      case "milestone":
+        return { label: "Milestone", variant: "secondary" as const };
       default:
         return { label: "Post", variant: "outline" as const };
     }
   };
 
   const typeBadge = getTypeBadge(post.type);
+  const author = post.profiles;
+  const jobData = post.jobs;
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    return 'Just now';
+  };
 
   return (
     <Card className={cn(
@@ -78,34 +72,33 @@ export const FeedCard = ({ post, onLike, onComment, onShare, className }: FeedCa
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-3 flex-1">
             <Avatar className="h-10 w-10 border border-border/40">
-              <AvatarImage src={post.author.avatar} alt={post.author.name} />
+              <AvatarImage src="" alt={author?.name || 'User'} />
               <AvatarFallback className="bg-gradient-primary text-primary-foreground text-sm">
-                {post.author.name.split(' ').map(n => n[0]).join('')}
+                {author?.name ? author.name.split(' ').map(n => n[0]).join('') : 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-2">
-                <h4 className="font-semibold text-sm truncate">{post.author.name}</h4>
-                {post.author.walletAddress && (
+                <h4 className="font-semibold text-sm truncate">{author?.name || 'Anonymous'}</h4>
+                {author?.wallet_address && (
                   <div className="flex items-center space-x-1 px-2 py-0.5 rounded bg-background/50 border border-primary/20">
                     <div className="h-1.5 w-1.5 bg-success rounded-full"></div>
                     <span className="text-xs font-mono text-muted-foreground">
-                      {formatAddress(post.author.walletAddress)}
+                      {formatAddress(author.wallet_address)}
                     </span>
                   </div>
                 )}
               </div>
-              {post.author.title && (
-                <p className="text-xs text-muted-foreground">
-                  {post.author.title}
-                  {post.author.company && ` at ${post.author.company}`}
+              {author?.bio && (
+                <p className="text-xs text-muted-foreground truncate">
+                  {author.bio}
                 </p>
               )}
               <div className="flex items-center space-x-2 mt-1">
                 <Badge {...typeBadge} className="text-xs">
                   {typeBadge.label}
                 </Badge>
-                <span className="text-xs text-muted-foreground">{post.timestamp}</span>
+                <span className="text-xs text-muted-foreground">{formatTimestamp(post.created_at)}</span>
               </div>
             </div>
           </div>
@@ -116,17 +109,22 @@ export const FeedCard = ({ post, onLike, onComment, onShare, className }: FeedCa
         <p className="text-sm leading-relaxed mb-4">{post.content}</p>
 
         {/* Job Details (if job post) */}
-        {post.type === "job" && post.jobData && (
+        {post.type === "job" && jobData && (
           <div className="p-4 rounded-lg bg-background/50 border border-primary/20 mb-4">
-            <h5 className="font-semibold text-sm mb-2 text-primary">{post.jobData.title}</h5>
+            <h5 className="font-semibold text-sm mb-2 text-primary">{jobData.title}</h5>
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center space-x-1 text-muted-foreground">
                 <MapPin className="h-3 w-3" />
-                <span>{post.jobData.location}</span>
+                <span>{jobData.location || 'Remote'}</span>
               </div>
               <div className="flex items-center space-x-1 text-success">
                 <DollarSign className="h-3 w-3" />
-                <span className="font-semibold">{post.jobData.salary}</span>
+                <span className="font-semibold">
+                  {jobData.budget_min && jobData.budget_max 
+                    ? `${jobData.budget_min}-${jobData.budget_max} ${jobData.currency}`
+                    : `${jobData.currency} based`
+                  }
+                </span>
               </div>
             </div>
             <Button variant="outline" size="sm" className="w-full mt-3">
@@ -162,16 +160,19 @@ export const FeedCard = ({ post, onLike, onComment, onShare, className }: FeedCa
               className="text-muted-foreground hover:text-primary transition-colors"
             >
               <Heart className="h-4 w-4 mr-1" />
-              {post.likes}
+              {post.likes_count}
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onComment?.(post.id)}
+              onClick={() => {
+                const comment = prompt("Add a comment:");
+                if (comment) onComment?.(post.id, comment);
+              }}
               className="text-muted-foreground hover:text-primary transition-colors"
             >
               <MessageCircle className="h-4 w-4 mr-1" />
-              {post.comments}
+              {post.comments_count}
             </Button>
             <Button
               variant="ghost"
@@ -180,7 +181,7 @@ export const FeedCard = ({ post, onLike, onComment, onShare, className }: FeedCa
               className="text-muted-foreground hover:text-primary transition-colors"
             >
               <Share2 className="h-4 w-4 mr-1" />
-              {post.shares}
+              {post.shares_count}
             </Button>
           </div>
         </div>
