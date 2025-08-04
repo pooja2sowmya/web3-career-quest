@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Briefcase, Users, Zap } from "lucide-react";
 import heroImage from "@/assets/hero-web3.jpg";
@@ -70,16 +71,22 @@ export const Hero = () => {
               variant="web3" 
               size="xl" 
               className="shadow-primary hover:shadow-glow group"
+              asChild
             >
-              Get Started
-              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              <Link to="/register">
+                Get Started
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Link>
             </Button>
             <Button 
               variant="connect" 
               size="xl"
+              asChild
             >
-              <Briefcase className="h-5 w-5" />
-              Browse Jobs
+              <Link to="/dashboard">
+                <Briefcase className="h-5 w-5" />
+                Browse Jobs
+              </Link>
             </Button>
           </div>
 

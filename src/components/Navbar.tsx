@@ -47,19 +47,19 @@ export const Navbar = ({
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <div className="hidden md:flex items-center space-x-6">
-              <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">
+              <Link to="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
                 <div className="flex items-center space-x-1">
                   <Home className="h-4 w-4" />
                   <span>Home</span>
                 </div>
               </Link>
-              <Link to="/jobs" className="text-sm font-medium transition-colors hover:text-primary">
+              <Link to="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
                 <div className="flex items-center space-x-1">
                   <Briefcase className="h-4 w-4" />
                   <span>Jobs</span>
                 </div>
               </Link>
-              <Link to="/network" className="text-sm font-medium transition-colors hover:text-primary">
+              <Link to="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
                 <div className="flex items-center space-x-1">
                   <Users className="h-4 w-4" />
                   <span>Network</span>
