@@ -26,11 +26,23 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))',
+					dark: 'hsl(var(--primary-dark))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
+					foreground: 'hsl(var(--secondary-foreground))',
+					glow: 'hsl(var(--secondary-glow))'
+				},
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))',
+					glow: 'hsl(var(--success-glow))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))'
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
@@ -63,6 +75,23 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				}
 			},
+			backgroundImage: {
+				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-hero': 'var(--gradient-hero)',
+				'gradient-card': 'var(--gradient-card)',
+				'gradient-border': 'var(--gradient-border)'
+			},
+			boxShadow: {
+				'primary': 'var(--shadow-primary)',
+				'secondary': 'var(--shadow-secondary)',
+				'glow': 'var(--shadow-glow)',
+				'card': 'var(--shadow-card)'
+			},
+			animation: {
+				'pulse-glow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+				'float': 'float 6s ease-in-out infinite',
+				'glow': 'glow 2s ease-in-out infinite alternate'
+			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
@@ -84,11 +113,22 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				float: {
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				glow: {
+					'0%': { boxShadow: '0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary))' },
+					'100%': { boxShadow: '0 0 20px hsl(var(--primary)), 0 0 30px hsl(var(--primary))' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-glow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+				'float': 'float 6s ease-in-out infinite',
+				'glow': 'glow 2s ease-in-out infinite alternate'
 			}
 		}
 	},
