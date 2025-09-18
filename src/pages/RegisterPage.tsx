@@ -31,17 +31,18 @@ export const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [step, setStep] = useState<'account' | 'profile'>('account');
+  const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
 
-  const { signUp, updateProfile } = useAuth();
+  const { signUp, updateProfile, user } = useAuth();
   const { walletAddress, walletType, isConnected } = useWallet();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isWalletRegistration && isConnected) {
+    if (isWalletRegistration && isConnected && user) {
       setStep('profile');
     }
-  }, [isWalletRegistration, isConnected]);
+  }, [isWalletRegistration, isConnected, user]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -76,16 +77,25 @@ export const RegisterPage = () => {
     setError("");
 
     try {
-      const { error } = await signUp(formData.email, formData.password, formData.fullName);
+      const { data, error } = await signUp(formData.email, formData.password, formData.fullName);
       if (error) {
         setError(error.message);
-      } else {
-        toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
-        });
-        setStep('profile');
+        return;
       }
+      // If email confirmation is required, no session will be returned
+      if (!data?.session && !data?.user) {
+        setNeedsEmailVerification(true);
+        toast({
+          title: 'Verify your email',
+          description: 'We sent you a confirmation link. After verifying, sign in to continue.',
+        });
+        return;
+      }
+      toast({
+        title: 'Account created!',
+        description: 'You are signed in. Complete your profile.',
+      });
+      setStep('profile');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -97,6 +107,12 @@ export const RegisterPage = () => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+
+    if (!user) {
+      setError('Please sign in after verifying your email to complete your profile.');
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const profileData = {
@@ -202,6 +218,14 @@ export const RegisterPage = () => {
             </Alert>
           )}
 
+          {needsEmailVerification && (
+            <Alert>
+              <AlertDescription>
+                Please verify your email. After confirmation, sign in to complete your profile.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {isWalletRegistration && isConnected && (
             <Alert>
               <CheckCircle2 className="h-4 w-4" />
@@ -223,7 +247,7 @@ export const RegisterPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {step === 'account' && !isWalletRegistration && (
+              {step === 'account' && (!isWalletRegistration || !user) && (
                 <form onSubmit={handleAccountStep} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="fullName">Full Name *</Label>
